@@ -31,5 +31,5 @@ setup(
     author_email="jeremy@bitrel.com",
     url="http://bitrel.com",
     platforms="POSIX",
-    packages=['reclib']
+    packages=['reclib', 'reclib.parse', 'reclib.format']
 )
