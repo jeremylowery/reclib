@@ -2,7 +2,7 @@ import cStringIO
 import re
 from decimal import Decimal
 
-import kg.data
+from reclib.util import decimal2implicit, parse_decimal
 
 __metaclass__ = type
 
@@ -18,10 +18,10 @@ class Currency(object):
         if value in (None, ''):
             return ' '*self.length
         if not isinstance(value, Decimal):
-            value = kg.data.parse_decimal(value)
+            value = parse_decimal(value)
 
         if self.implied_decimal is not None:
-            value = kg.data.decimal2implicit(value, self.implied_decimal)
+            value = decimal2implicit(value, self.implied_decimal)
 
         return str(value).rjust(self.length, self.pad)
 

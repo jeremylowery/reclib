@@ -54,5 +54,3 @@ def deploy(revision='tip'):
     # Install the source package on the host
     with cd("/tmp/%s" % app_dir):
         run("python setup.py -q install --prefix=/usr/local")
-    # reload apache
-    run("sudo apache2ctl graceful")

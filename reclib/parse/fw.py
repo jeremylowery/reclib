@@ -8,13 +8,13 @@ import cStringIO
 import csv
 import datetime
 import decimal
-import logging; log=logging.getLogger("")
 import os
 import re
-import rec
 import time
 
-from kg.strftime import strftime
+import rec
+
+from reclib.util import strftime
 
 class Parser(object):
     """ The parser builds a set of records from a file, stream or path.

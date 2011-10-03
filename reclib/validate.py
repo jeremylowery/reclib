@@ -1,5 +1,5 @@
 """
-See reclib.ut for usage
+See reclib.test for usage
 """
 import datetime
 import time
