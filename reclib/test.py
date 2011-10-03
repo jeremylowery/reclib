@@ -80,7 +80,6 @@ class DelimFieldParseHarness(object):
 
 class ValidatorTestCase(unittest.TestCase):
     def test_DateInPast(self):
-        import reclib.validate as V
         validator = V.DateInPast('dob')
         res = V.RecordValidationResult()
         record = {'dob' : '20230101'}
@@ -93,7 +92,15 @@ class ValidatorTestCase(unittest.TestCase):
         validator(record, res)
         self.assertEquals(len(res), 0)
 
+    def test_length_validator(self):
+        validator = V.Length('first_name', max=12)
+        res = V.RecordValidationResult()
+        record = {'first_name' : 'john'}
+        validator(record, res)
+        self.assertEqual(len(res), 0)
+        validator({'first_name': 'xxxxxxxfasdfasdf'}, res)
+        self.assertEqual(len(res), 1)
+
 if __name__ == '__main__':
     unittest.main()
-
 

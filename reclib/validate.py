@@ -6,6 +6,9 @@ import time
 
 class Validator(object):
     checks = []
+    def __init__(self, *checks):
+        if checks:
+            self.checks = checks
 
     def validate(self, record):
         result = RecordValidationResult()
@@ -116,4 +119,19 @@ class DateInPast(object):
         value = datetime.date(*value[:3])
         if value > datetime.date.today():
             result.error(self.field, "Value must be in the past.")
+
+class Length(object):
+    def __init__(self, field, min=None, max=None, msg='Value too short or long'):
+        self.field = field
+        self.min = min
+        self.max = max
+        self.msg = msg
+
+    def __call__(self, record, result):
+        value = record.get(self.field, '')
+        if self.min and len(value) < self.min:
+            return result.error(self.field, self.msg)
+        if self.max and len(value) > self.max:
+            return result.error(self.field, self.msg)
+
 
