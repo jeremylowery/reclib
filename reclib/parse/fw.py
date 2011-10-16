@@ -211,6 +211,8 @@ class String(object):
         self.lower = kw.get('lower', False)
         self.tr = kw.get('tr', False)
         self.tr_match = kw.get('tr_match', True)
+        self.regex_sub = kw.get("regex_sub")
+        self.regex_replace = kw.get("regex_replace", "")
 
     def parse(self, stream, err, warn):
         if self.length == 0:
@@ -234,6 +236,9 @@ class String(object):
                 err("unexpected value", value)
 
         # Transform
+        if self.regex_sub:
+            value = re.sub(self.regex_sub, self.regex_replace, value)
+
         if self.tr:
             try:
                 value = self.tr[value]
