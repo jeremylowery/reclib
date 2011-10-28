@@ -281,9 +281,7 @@ class Date(object):
         if not value:
             if self.required:
                 err("missing required value", value)
-                return
-            else:
-                value = None
+            return
         else:
             try:
                 value = time.strptime(value, self.format)
