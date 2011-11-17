@@ -15,20 +15,20 @@ def decimal2implicit(value, implicit):
     return (value * (10 ** implicit)).to_integral()
 
 
-def parse_decimal(s, p1=re.compile("^.*?(\d+\.\d+).*$"),
-                     p2=re.compile("^.*?(\d+).*$")):
+def parse_decimal(s, p1=re.compile("^(\.\d+)$"),
+                     p2=re.compile("^.*?(\d+\.\d+).*$"),
+                     p3=re.compile("^.*?(\d+).*$")):
     """ Strips out a real number from an arbitrary string. If no number can
     be found, returns None. Useful for currency parsing.
     """
     if not isinstance(s, basestring):
         return decimal.Decimal(s)
     s = s.replace(",", "")
-    match = p1.match(s)
-    if match:
-        return decimal.Decimal(match.groups()[0])
-    match = p2.match(s)
-    if match:
-        return decimal.Decimal(match.groups()[0])
+
+    for p in [p1, p2, p3]:
+        match = p.match(s)
+        if match:
+            return decimal.Decimal(match.groups()[0])
     try:
         return decimal.Decimal(s)
     except decimal.InvalidOperation:
