@@ -23,6 +23,7 @@ class Parser(object):
     spacing = 0
     
     file_name = None
+    _field_cache = None
 
     def __init__(self, *fields):
         if fields:
@@ -40,6 +41,11 @@ class Parser(object):
 
     def post_process(self, record):
         pass
+
+    def field(self, name):
+        if not self._field_cache:
+            self._field_cache = dict((f.name, f) for f in self.fields)
+        return self._field_cache[name]
 
     def parseline(self, stream):
         # Possible that a file object was passed in
