@@ -34,8 +34,12 @@ class Parser(object):
         while not stream.eof:
             record = self.parseline(stream)
             if not stream.eof:
+                self.post_process(record)
                 records.append(record)
         return records
+
+    def post_process(self, record):
+        pass
 
     def parseline(self, stream):
         # Possible that a file object was passed in
