@@ -7,6 +7,7 @@ import shutil
 from fabric.api import *
 
 #env.hosts = [']
+os.chdir(os.path.dirname(__file__))
 
 def _get_version():
     return commands.getoutput(r'cat setup.py  | grep version | cut -d\" -f2')
