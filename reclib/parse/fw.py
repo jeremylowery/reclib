@@ -8,6 +8,7 @@ import cStringIO
 import csv
 import datetime
 import decimal
+import logging
 import os
 import re
 import time
@@ -15,6 +16,8 @@ import time
 import rec
 
 from reclib.util import strftime
+
+log = logging.getLogger('reclib')
 
 class Parser(object):
     """ The parser builds a set of records from a file, stream or path.
@@ -51,10 +54,9 @@ class Parser(object):
         # Possible that a file object was passed in
         if not isinstance(stream, RecordStream):
             stream = RecordStream(stream)
+        stream.move_next()
         record = Record(self.fields, self.spacing)
         record.parse(stream)
-        while not stream.eof and stream.read(1) != '\n':
-            pass
         return record
 
     def parse_file(self, path=None):
@@ -80,36 +82,52 @@ class Parser(object):
                 yield record
 
 class RecordStream(object):
-    """
-    Utility
-    
-    This record stream encapsulates a file, along with its line count,
-    and positions in the file.
-
-    XXX:TODO Implement readline(s)
-    """
     def __init__(self, file_obj):
-        self.file_obj = file_obj
-        self.line_no = 1
+        self.line_no = 0
         self.eof = False
         self.dead_read = False
-        self.cur_line_pos = 0
+        self._current_column = 0
+        self._file_obj = file_obj
+        self._line_iter = iter(file_obj)
+        self._cur_line = None
+
+    def move_next(self):
+        """ Advance to the next line. This must be called between every
+        record.
+        """
+        try:
+            line_str = self._line_iter.next()
+        except StopIteration:
+            self.eof = True
+            self.dead_read = True
+            return
+
+        if line_str:
+            line_str = line_str[:-1]        # Wack off the \n from the end
+        self.dead_read = False
+        self._cur_line = cStringIO.StringIO(line_str)
+        self.line_no += 1
+        self._current_column = 0
 
     def read(self, size):
-        bytes = self.file_obj.read(size)
-        nlp = bytes.find('\n')
-        if nlp != -1:
-            self.cur_line_pos = self.file_obj.tell() - len(bytes) + nlp + 1
-            self.line_no += 1
-        if len(bytes) < size:
-            self.eof = True
-            if len(bytes) == 0:
-                self.dead_read = True
+        """ Will not read past the end of a line. The next read afterwards
+        will start on the next line.
+        """
+        if self.eof:
+            return ''
+
+        bytes = self._cur_line.read(size)
+        log.debug('read %r', bytes)
+        self._current_column += len(bytes)
+        if len(bytes) == 0:
+            self.dead_read = True
+        else:
+            self.dead_read = False
+
         return bytes
 
     def get_pos(self):
-        """ return the line character the file is positioned at """
-        return self.file_obj.tell() - self.cur_line_pos
+        return self._current_column
 
     def __getattr__(self, attr):
         return getattr(self.file_obj, attr)
