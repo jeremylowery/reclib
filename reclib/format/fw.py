@@ -4,19 +4,18 @@ from decimal import Decimal
 
 from reclib.util import decimal2implicit, parse_decimal
 
-__metaclass__ = type
-
 class Currency(object):
     def __init__(self, name, length, **kw):
         self.name = name
         self.length = length
         self.implied_decimal = kw.get('implied_decimal', None)
         self.pad = kw.get('pad', ' ')
+        assert len(self.pad) == 1, "Numeric pad character must be one byte"
 
     def format(self, record, reporter):
         value = record.get(self.name, '')
         if value in (None, ''):
-            return ' '*self.length
+            return self.pad * self.length
         if not isinstance(value, Decimal):
             value = parse_decimal(value)
 
@@ -25,7 +24,7 @@ class Currency(object):
 
         return str(value).rjust(self.length, self.pad)
 
-class Integer:
+class Integer(object):
     def __init__(self, name, length):
         self.name = name
         self.length = length
