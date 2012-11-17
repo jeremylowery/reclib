@@ -1,18 +1,24 @@
+import logging
 from cStringIO import StringIO
 import datetime
+import unittest
+
 import reclib.validate as V
 import reclib.parse.fw as PF
-import unittest
+
+logging.basicConfig(level=logging.DEBUG)
 
 class ParseFWTestCase(unittest.TestCase):
     def test_RecordStream(self):
         buf = StringIO("abcdefg")
         stream = PF.RecordStream(buf)
+        stream.move_next()
         self.assertEquals(stream.read(1), "a")
         self.assertEquals(stream.get_pos(), 1)
         self.assertEquals(stream.read(6), "bcdefg")
         self.assertEquals(stream.eof, False)
         self.assertEquals(stream.read(1), "")
+        stream.move_next()
         self.assertEquals(stream.eof, True)
 
     def test_Validator(self):
