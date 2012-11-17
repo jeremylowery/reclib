@@ -102,7 +102,7 @@ class RecordStream(object):
             self.dead_read = True
             return
 
-        if line_str:
+        if line_str and line_str[-1] == '\n':
             line_str = line_str[:-1]        # Wack off the \n from the end
         self.dead_read = False
         self._cur_line = cStringIO.StringIO(line_str)
