@@ -79,6 +79,7 @@ class Parser(object):
         while not stream.eof:
             record = self.parseline(stream)
             if not stream.eof:
+                self.post_process(record)
                 yield record
 
 class RecordStream(object):
