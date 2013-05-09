@@ -30,7 +30,6 @@ class ParseFWTestCase(unittest.TestCase):
 
         v = MyValidator()
         result = v.validate({"first_name" : "john", "color" : "blue"})
-        #print result
 
     def test_parse_date(self):
         import reclib.parse.fw as P
@@ -39,6 +38,12 @@ class ParseFWTestCase(unittest.TestCase):
         self.assertEquals(value, datetime.date(2001, 12, 30))
         h("18950101")
         self.assertEquals(h.errors[0][1], 'Expected year after 1900')
+
+    def test_parse_datetime(self):
+        import reclib.parse.fw as P
+        h = FixedFieldParseHarness(P.Datetime("d", "YYYYMMDDHHMM"))
+        value = h("200112301430")
+        self.assertEquals(value, datetime.datetime(2001, 12, 30, 14, 30, 0))
 
 class FixedFieldParseHarness(object):
     """ Use me to test individual fixed width parse field objects """

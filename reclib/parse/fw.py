@@ -344,6 +344,7 @@ class Datetime(object):
         'YYYYMMDD' : (8, '%Y%m%d'),
         'YYMMDD'   : (6, '%y%m%d'),
         'MMDDYYYY' : (8, '%m%d%Y'),
+        'YYYYMMDDHHMM' : (12, '%Y%m%d%H%M'),
         'YYYYMMDDHHMMSS' : (14, '%Y%m%d%H%M%S')
     }
     def __init__(self, name, format='YYYYMMDDHHMMSS', 
@@ -352,6 +353,9 @@ class Datetime(object):
                  none_if_invalid=False,
                  min_year=None):
         self.name = name
+        if format not in self.formats:
+            raise ValueError("Invalid format %s: Valid formats - %s" %
+                (format, " ".join(self.formats)))
         self.length, self.format = self.formats[format]
         self.required = required
         self.none_if_invalid = none_if_invalid
