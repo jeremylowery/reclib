@@ -14,10 +14,14 @@ class Parser(object):
     fields = []
     header_lines = 0
     _field_cache = None
+    delimiter = ','
+    dialect=csv.excel
 
     def parse(self, file_obj, src=None):
         records = rec.RecordSet(src)
-        for i, line in enumerate(csv.reader(file_obj)):
+        r = csv.reader(file_obj, delimiter=self.delimiter,
+                       dialect=self.dialect)
+        for i, line in enumerate(r):
             if i < self.header_lines:
                 continue
             line_no = i + 1

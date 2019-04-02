@@ -5,6 +5,7 @@ import unittest
 
 import reclib.validate as V
 import reclib.parse.fw as PF
+import reclib.parse.delim as P
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -65,12 +66,27 @@ class FixedFieldParseHarness(object):
 
 class ParseDelimTestCase(unittest.TestCase):
     def test_parse_date(self):
-        import reclib.parse.delim as P
         h = DelimFieldParseHarness(P.Date("d", "%Y%m%d", min_year=1900))
         value = h("20011230")
         self.assertEquals(value, datetime.date(2001, 12, 30))
         h("18950101")
         self.assertEquals(h.errors[0], 'Expected year after 1900')
+
+    def test_tab_delim(self):
+        b = StringIO("""\
+a\tb\tc
+d\te\tf
+""")
+        p = P.Parser()
+        p.fields = [
+            P.String("foo"),
+            P.String("bar"),
+            P.String("baz"),
+        ]
+        p.delimiter = "\t"
+        recs = p.parse(b)
+        self.assertEquals(next(recs), {'baz': 'c', 'foo': 'a', 'bar': 'b'})
+        self.assertEquals(next(recs), {'baz': 'f', 'foo': 'd', 'bar': 'e'})
 
 class DelimFieldParseHarness(object):
     """ Use me to test individual delimited parse field objects """
