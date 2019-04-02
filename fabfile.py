@@ -13,8 +13,7 @@ def _get_version():
     return commands.getoutput(r'cat setup.py  | grep version | cut -d\" -f2')
 
 def update():
-    local("rm -rf /usr/local/lib/python2.6/dist-packages/reclib")
-    local("python setup.py --quiet install --prefix=/usr/local")
+    local("python setup.py --quiet install")
 
 def deploy(revision='tip'):
     """ Send off to production server and install """
