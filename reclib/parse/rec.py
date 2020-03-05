@@ -2,19 +2,6 @@ class RecordSet(list):
     def __init__(self, src=None):
         self.src = src
 
-    _idx = 0
-    def __iter__(self):
-        self._idx = 0
-        return self
-
-    def next(self):
-        try:
-            v = self[self._idx]
-        except IndexError:
-            raise StopIteration()
-        self._idx += 1
-        return v
-
     @property
     def error_size(self):
         return len([x for x in self if x.errors])

@@ -1,12 +1,13 @@
-import cStringIO
 import csv
 import datetime
 import decimal
 import logging
 import os
 import re
-import rec
 import time
+
+from . import rec
+
 
 log = logging.getLogger('reclib')
 
@@ -80,7 +81,7 @@ class Currency(object):
         else:
             try:
                 value = decimal.Decimal(value)
-            except Exception, e:
+            except Exception as e:
                 err(str(e))
                 return
 

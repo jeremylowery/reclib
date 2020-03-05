@@ -1,7 +1,8 @@
 import logging
-from cStringIO import StringIO
 import datetime
 import unittest
+
+import six
 
 import reclib.validate as V
 import reclib.parse.fw as PF
@@ -11,16 +12,16 @@ logging.basicConfig(level=logging.DEBUG)
 
 class ParseFWTestCase(unittest.TestCase):
     def test_RecordStream(self):
-        buf = StringIO("abcdefg")
+        buf = six.StringIO("abcdefg")
         stream = PF.RecordStream(buf)
         stream.move_next()
-        self.assertEquals(stream.read(1), "a")
-        self.assertEquals(stream.get_pos(), 1)
-        self.assertEquals(stream.read(6), "bcdefg")
-        self.assertEquals(stream.eof, False)
-        self.assertEquals(stream.read(1), "")
+        self.assertEqual(stream.read(1), "a")
+        self.assertEqual(stream.get_pos(), 1)
+        self.assertEqual(stream.read(6), "bcdefg")
+        self.assertEqual(stream.eof, False)
+        self.assertEqual(stream.read(1), "")
         stream.move_next()
-        self.assertEquals(stream.eof, True)
+        self.assertEqual(stream.eof, True)
 
     def test_Validator(self):
         class MyValidator(V.Validator):
@@ -36,15 +37,15 @@ class ParseFWTestCase(unittest.TestCase):
         import reclib.parse.fw as P
         h = FixedFieldParseHarness(P.Date("d", 8, "%Y%m%d", min_year=1900))
         value = h("20011230")
-        self.assertEquals(value, datetime.date(2001, 12, 30))
+        self.assertEqual(value, datetime.date(2001, 12, 30))
         h("18950101")
-        self.assertEquals(h.errors[0][1], 'Expected year after 1900')
+        self.assertEqual(h.errors[0][1], 'Expected year after 1900')
 
     def test_parse_datetime(self):
         import reclib.parse.fw as P
         h = FixedFieldParseHarness(P.Datetime("d", "YYYYMMDDHHMM"))
         value = h("200112301430")
-        self.assertEquals(value, datetime.datetime(2001, 12, 30, 14, 30, 0))
+        self.assertEqual(value, datetime.datetime(2001, 12, 30, 14, 30, 0))
 
 class FixedFieldParseHarness(object):
     """ Use me to test individual fixed width parse field objects """
@@ -54,7 +55,7 @@ class FixedFieldParseHarness(object):
     def __call__(self, value):
         self.errors = []
         self.warnings = []
-        buf = StringIO(value)
+        buf = six.StringIO(value)
         value = self.field.parse(buf, self.err, self.warn)
         return value
 
@@ -68,12 +69,12 @@ class ParseDelimTestCase(unittest.TestCase):
     def test_parse_date(self):
         h = DelimFieldParseHarness(P.Date("d", "%Y%m%d", min_year=1900))
         value = h("20011230")
-        self.assertEquals(value, datetime.date(2001, 12, 30))
+        self.assertEqual(value, datetime.date(2001, 12, 30))
         h("18950101")
-        self.assertEquals(h.errors[0], 'Expected year after 1900')
+        self.assertEqual(h.errors[0], 'Expected year after 1900')
 
     def test_tab_delim(self):
-        b = StringIO("""\
+        b = six.StringIO("""\
 a\tb\tc
 d\te\tf
 """)
@@ -84,9 +85,9 @@ d\te\tf
             P.String("baz"),
         ]
         p.delimiter = "\t"
-        recs = p.parse(b)
-        self.assertEquals(next(recs), {'baz': 'c', 'foo': 'a', 'bar': 'b'})
-        self.assertEquals(next(recs), {'baz': 'f', 'foo': 'd', 'bar': 'e'})
+        recs = iter(p.parse(b))
+        self.assertEqual(next(recs), {'baz': 'c', 'foo': 'a', 'bar': 'b'})
+        self.assertEqual(next(recs), {'baz': 'f', 'foo': 'd', 'bar': 'e'})
 
 class DelimFieldParseHarness(object):
     """ Use me to test individual delimited parse field objects """
@@ -111,13 +112,13 @@ class ValidatorTestCase(unittest.TestCase):
         res = V.RecordValidationResult()
         record = {'dob' : '20230101'}
         validator(record, res)
-        self.assertEquals(res[0].field, 'dob')
-        self.assertEquals(res[0].msg, 'Value must be in the past.')
+        self.assertEqual(res[0].field, 'dob')
+        self.assertEqual(res[0].msg, 'Value must be in the past.')
 
         record = {'dob' : '20030101'}
         res = V.RecordValidationResult()
         validator(record, res)
-        self.assertEquals(len(res), 0)
+        self.assertEqual(len(res), 0)
 
     def test_length_validator(self):
         validator = V.Length('first_name', max=12)

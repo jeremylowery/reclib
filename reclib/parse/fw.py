@@ -4,7 +4,6 @@ options and format specification.
 Not meant for complex multi field logic or business rules processing. Need to
 have a general validation object system for that.
 """
-import cStringIO
 import csv
 import datetime
 import decimal
@@ -13,9 +12,10 @@ import os
 import re
 import time
 
-import rec
+import six
 
 from reclib.util import strftime
+from . import rec
 
 log = logging.getLogger('reclib')
 
@@ -97,7 +97,7 @@ class RecordStream(object):
         record.
         """
         try:
-            line_str = self._line_iter.next()
+            line_str = next(self._line_iter)
         except StopIteration:
             self.eof = True
             self.dead_read = True
@@ -106,7 +106,7 @@ class RecordStream(object):
         if line_str and line_str[-1] == '\n':
             line_str = line_str[:-1]        # Wack off the \n from the end
         self.dead_read = False
-        self._cur_line = cStringIO.StringIO(line_str)
+        self._cur_line = six.StringIO(line_str)
         self.line_no += 1
         self._current_column = 0
 
@@ -428,7 +428,7 @@ class Currency(object):
         else:
             try:
                 value = decimal.Decimal(value)
-            except Exception, e:
+            except Exception as e:
                 err(str(e), value)
                 return
 

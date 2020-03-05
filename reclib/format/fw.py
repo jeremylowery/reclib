@@ -1,5 +1,5 @@
-import cStringIO
 import re
+import six
 from decimal import Decimal
 
 from reclib.util import decimal2implicit, parse_decimal
@@ -155,7 +155,7 @@ class Formatter(object):
 
     def format(self, records, file_obj=None, reset=True):
         if file_obj is None:
-            file_obj = cStringIO.StringIO()
+            file_obj = six.StringIO()
         reporter = Reporter()
         for idx, record in enumerate(records):
             for field in self.fields:
@@ -170,7 +170,7 @@ class Formatter(object):
 
     def formatone(self, record, file_obj=None, reset=True):
         if file_obj is None:
-            file_obj = cStringIO.StringIO()
+            file_obj = six.StringIO()
         reporter = Reporter()
         for field in self.fields:
             reporter.set_field(field, 1)

@@ -15,6 +15,9 @@ def _get_version():
 def update():
     local("python setup.py --quiet install")
 
+def update3():
+    local("python3 setup.py --quiet install")
+
 def deploy(revision='tip'):
     """ Send off to production server and install """
 
