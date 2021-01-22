@@ -1,3 +1,5 @@
+from builtins import next
+from builtins import object
 import logging
 import datetime
 import unittest

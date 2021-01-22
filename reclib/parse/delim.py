@@ -1,3 +1,6 @@
+from builtins import zip
+from builtins import str
+from builtins import object
 import csv
 import datetime
 import decimal
@@ -39,9 +42,9 @@ class Parser(object):
         if not self._field_cache:
             self._field_cache = dict((f.name, f) for f in self.fields)
         return self._field_cache[name]
-            
-    def parse_file(self, path):
-        file_obj = open(path)
+
+    def parse_file(self, path, *args, **kwargs):
+        file_obj = open(path, *args, **kwargs)
         records = self.parse(file_obj, os.path.basename(path))
         file_obj.close()
         return records

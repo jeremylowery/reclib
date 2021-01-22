@@ -1,3 +1,5 @@
+from builtins import str
+from past.builtins import basestring
 import decimal
 import re
 import time

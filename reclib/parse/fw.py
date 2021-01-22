@@ -4,6 +4,13 @@ options and format specification.
 Not meant for complex multi field logic or business rules processing. Need to
 have a general validation object system for that.
 """
+from __future__ import division
+from builtins import next
+from builtins import str
+from builtins import range
+from past.builtins import basestring
+from past.utils import old_div
+from builtins import object
 import csv
 import datetime
 import decimal
@@ -59,10 +66,8 @@ class Parser(object):
         record.parse(stream)
         return record
 
-    def parse_file(self, path=None):
-        if path is not None:
-            self.file_name = path
-        file_obj = open(self.file_name)
+    def parse_file(self, path, *args, **kwargs):
+        file_obj = open(self.file_name, *args, **kwargs)
         records = self.parse(file_obj, os.path.basename(self.file_name))
         file_obj.close()
         return records
@@ -180,7 +185,7 @@ class Multi(object):
         for i in range(self.count):
             record = {}
             self.stype.assign(record, stream, err, warn)
-            for k, v in record.items():
+            for k, v in list(record.items()):
                 values.setdefault(k, [])
                 values[k].append(v)
             if stream.eof:
@@ -188,7 +193,7 @@ class Multi(object):
 
         if self.join is not None:
             jval = {}
-            for k, v in values.items():
+            for k, v in list(values.items()):
                 jval[k] = self.join.join(v)
                 if self.rstrip:
                     jval[k] = jval[k].rstrip()
@@ -198,7 +203,7 @@ class Multi(object):
         return values
 
     def assign(self, record, stream, err, warn):
-        for k, v in self.parse(stream, err, warn).items():
+        for k, v in list(self.parse(stream, err, warn).items()):
             record[k] = v
 
 class RecordList(object):
@@ -437,7 +442,7 @@ class Currency(object):
             return
 
         if self.implicit:
-            value = value / (10 ** self.implicit)
+            value = old_div(value, (10 ** self.implicit))
         return value
 
     def assign(self, record, stream, err, warn):
