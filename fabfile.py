@@ -1,7 +1,5 @@
 from fabric.api import *
 
-os.chdir(os.path.dirname(__file__))
-
 version = "0.2.0"
 wheel = "reclib-{0}-py3-none-any.whl".format(version)
 
