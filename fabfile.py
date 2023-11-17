@@ -1,6 +1,6 @@
 from fabric.api import *
 
-version = "0.2.0"
+version = "0.2.2"
 wheel = "reclib-{0}-py3-none-any.whl".format(version)
 
 def build():
