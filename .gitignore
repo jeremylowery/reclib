@@ -1,3 +1,5 @@
+.venv
+*.egg-info
 *.pyc
 *.swp
 *.swo
