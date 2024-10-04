@@ -19,3 +19,6 @@ push = true
 "fabfile.py" = [
     'version = "{version}"',
 ]
+"Makefile" = [
+    'export VERSION = {version}',
+]
