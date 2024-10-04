@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="reclib",
-    version="0.2.3",
+    version="0.2.4",
     provides=["reclib"],
     description="reclib library",
     long_description="record parsing and validating library",

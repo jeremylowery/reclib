@@ -1,4 +1,4 @@
-export VERSION = 0.2.3
+export VERSION = 0.2.4
 VENV ?= .venv
 PY = $(VENV)/bin/python
 PYFILES=$(shell find reclib -type f -name '*.py') setup.py
