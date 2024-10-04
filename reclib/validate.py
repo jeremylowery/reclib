@@ -1,14 +1,16 @@
 """
 See reclib.test for usage
 """
+
 from builtins import str
-from past.builtins import basestring
 from builtins import object
 import datetime
 import time
 
+
 class Validator(object):
     checks = []
+
     def __init__(self, *checks):
         if checks:
             self.checks = checks
@@ -19,15 +21,18 @@ class Validator(object):
             field(record, result)
         return result
 
+
 class RecordValidationResult(list):
 
     def error(self, field, msg, *a):
-        if a: msg %= a
+        if a:
+            msg %= a
         self.append(RecordError(field, msg))
 
     def __str__(self):
         return "\n".join([str(s) for s in self])
-    
+
+
 class RecordError(object):
     def __init__(self, field, msg):
         self.field = field
@@ -40,6 +45,7 @@ class RecordError(object):
             return "%s: %s" % (", ".join(self.field), self.msg)
         return "%s: %s" % (self.field, self.msg)
 
+
 class Required(object):
     def __init__(self, field, strip=True, msg="Missing required value"):
         self.field = field
@@ -48,8 +54,8 @@ class Required(object):
 
     def __call__(self, record, result):
         fld = self.field
-        value = record.get(fld, '')
-        if not isinstance(value, basestring):
+        value = record.get(fld, "")
+        if not isinstance(value, str):
             if not value:
                 result.error(fld, self.msg)
             return
@@ -57,6 +63,7 @@ class Required(object):
             value = value.strip()
         if not value:
             result.error(fld, self.msg)
+
 
 class Values(object):
     def __init__(self, field, values, msg=None):
@@ -73,7 +80,7 @@ class Values(object):
                 valstr = "%r or %r" % tuple(values)
             else:
                 for i, v in enumerate(values):
-                    if i == len(values) -1:
+                    if i == len(values) - 1:
                         s.extend(["or", v])
                     else:
                         s.extend(["%r," % v])
@@ -84,20 +91,21 @@ class Values(object):
 
     def __call__(self, record, result):
         fld = self.field
-        value = record.get(fld, '')
+        value = record.get(fld, "")
         if not value:
             return
         if value not in self.values:
             result.error(fld, self.msg % value)
 
+
 class ISODate(object):
-    def __init__(self, field, msg='Invalid date %s. Expected YYYYMMDD'):
+    def __init__(self, field, msg="Invalid date %s. Expected YYYYMMDD"):
         self.field = field
         self.msg = msg
 
     def __call__(self, record, result):
         fld = self.field
-        value = record.get(fld, '')
+        value = record.get(fld, "")
         if not value:
             return
 
@@ -106,12 +114,13 @@ class ISODate(object):
         except ValueError:
             result.error(fld, self.msg % value)
 
+
 class DateInPast(object):
     def __init__(self, field):
         self.field = field
 
     def __call__(self, record, result):
-        value = record.get(self.field, '')
+        value = record.get(self.field, "")
         if not value:
             return
         try:
@@ -123,18 +132,17 @@ class DateInPast(object):
         if value > datetime.date.today():
             result.error(self.field, "Value must be in the past.")
 
+
 class Length(object):
-    def __init__(self, field, min=None, max=None, msg='Value too short or long'):
+    def __init__(self, field, min=None, max=None, msg="Value too short or long"):
         self.field = field
         self.min = min
         self.max = max
         self.msg = msg
 
     def __call__(self, record, result):
-        value = record.get(self.field, '')
+        value = record.get(self.field, "")
         if self.min and len(value) < self.min:
             return result.error(self.field, self.msg)
         if self.max and len(value) > self.max:
             return result.error(self.field, self.msg)
-
-

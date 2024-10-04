@@ -7,7 +7,6 @@ setup(
     description="reclib library",
     long_description="record parsing and validating library",
     license="",
-    install_requires=["future; python_version == '2.7'"],
     author="Jeremy Lowery",
     author_email="jeremy@bitrel.com",
     url="http://bitrel.com",

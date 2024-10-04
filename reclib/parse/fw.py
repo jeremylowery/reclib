@@ -4,13 +4,7 @@ options and format specification.
 Not meant for complex multi field logic or business rules processing. Need to
 have a general validation object system for that.
 """
-from __future__ import division
-from builtins import next
-from builtins import str
-from builtins import range
-from past.builtins import basestring
-from past.utils import old_div
-from builtins import object
+
 import csv
 import datetime
 import decimal
@@ -24,14 +18,16 @@ import six
 from reclib.util import strftime
 from . import rec
 
-log = logging.getLogger('reclib')
+log = logging.getLogger("reclib")
 
-class Parser(object):
-    """ The parser builds a set of records from a file, stream or path.
-    It provides a clean interface to clients. """
+
+class Parser:
+    """The parser builds a set of records from a file, stream or path.
+    It provides a clean interface to clients."""
+
     fields = []
     spacing = 0
-    
+
     file_name = None
     _field_cache = None
 
@@ -75,7 +71,7 @@ class Parser(object):
     def parse_iter(self, file=None):
         if file is None:
             file_obj, src = open(self.file_name), self.file_name
-        elif isinstance(file, basestring):
+        elif isinstance(file, str):
             file_obj, src = open(file), file
         else:
             file_obj, src = file, None
@@ -86,6 +82,7 @@ class Parser(object):
             if not stream.eof:
                 self.post_process(record)
                 yield record
+
 
 class RecordStream(object):
     def __init__(self, file_obj):
@@ -98,7 +95,7 @@ class RecordStream(object):
         self._cur_line = None
 
     def move_next(self):
-        """ Advance to the next line. This must be called between every
+        """Advance to the next line. This must be called between every
         record.
         """
         try:
@@ -108,22 +105,22 @@ class RecordStream(object):
             self.dead_read = True
             return
 
-        if line_str and line_str[-1] == '\n':
-            line_str = line_str[:-1]        # Wack off the \n from the end
+        if line_str and line_str[-1] == "\n":
+            line_str = line_str[:-1]  # Wack off the \n from the end
         self.dead_read = False
         self._cur_line = six.StringIO(line_str)
         self.line_no += 1
         self._current_column = 0
 
     def read(self, size):
-        """ Will not read past the end of a line. The next read afterwards
+        """Will not read past the end of a line. The next read afterwards
         will start on the next line.
         """
         if self.eof:
-            return ''
+            return ""
 
         bytes = self._cur_line.read(size)
-        log.debug('read %r', bytes)
+        log.debug("read %r", bytes)
         self._current_column += len(bytes)
         if len(bytes) == 0:
             self.dead_read = True
@@ -137,6 +134,7 @@ class RecordStream(object):
 
     def __getattr__(self, attr):
         return getattr(self.file_obj, attr)
+
 
 class Record(dict):
     def __init__(self, fields, spacing):
@@ -160,7 +158,7 @@ class Record(dict):
                 return
 
             # We don't read spacing on the last record
-            if j != (len(self.fields)-1) and self.spacing:
+            if j != (len(self.fields) - 1) and self.spacing:
                 stream.read(self.spacing)
 
     def format(self):
@@ -170,8 +168,10 @@ class Record(dict):
     def format_errors(self):
         return "line: %05d\n%s\n-----\n" % (self.line_no, self.errors.format())
 
+
 class Multi(object):
-    """ Multi-value field. Appends the value of the given in a list."""
+    """Multi-value field. Appends the value of the given in a list."""
+
     def __init__(self, stype, count, join=None, rstrip=False):
         self.stype = stype
         self.name = self.stype.name
@@ -206,10 +206,12 @@ class Multi(object):
         for k, v in list(self.parse(stream, err, warn).items()):
             record[k] = v
 
+
 class RecordList(object):
-    """ A list of sub-records in a main record. Similar to Multi, but parses
+    """A list of sub-records in a main record. Similar to Multi, but parses
     in a different order.
     """
+
     def __init__(self, name, count, *fields):
         self.name = name
         self.count = count
@@ -230,27 +232,28 @@ class RecordList(object):
     def assign(self, record, stream, err, warn):
         record[self.name] = self.parse(stream, err, warn)
 
+
 class String(object):
     def __init__(self, name, length, **kw):
         self.name = name
         self.length = length
-        self.values = kw.get('values')
-        self.regex = kw.get('regex')
-        self.strip_left = kw.get('strip_left', False)
-        self.strip_right = kw.get('strip_right', True)
-        self.required = kw.get('required', False)
-        self.validate_blank = kw.get('validate_blank', False)
-        self.title = kw.get('title', False)
-        self.upper = kw.get('upper', False)
-        self.lower = kw.get('lower', False)
-        self.tr = kw.get('tr', False)
-        self.tr_match = kw.get('tr_match', True)
+        self.values = kw.get("values")
+        self.regex = kw.get("regex")
+        self.strip_left = kw.get("strip_left", False)
+        self.strip_right = kw.get("strip_right", True)
+        self.required = kw.get("required", False)
+        self.validate_blank = kw.get("validate_blank", False)
+        self.title = kw.get("title", False)
+        self.upper = kw.get("upper", False)
+        self.lower = kw.get("lower", False)
+        self.tr = kw.get("tr", False)
+        self.tr_match = kw.get("tr_match", True)
         self.regex_sub = kw.get("regex_sub")
         self.regex_replace = kw.get("regex_replace", "")
 
     def parse(self, stream, err, warn):
         if self.length == 0:
-            return ''
+            return ""
         value = stream.read(self.length)
         # Manage white space
         if self.strip_left:
@@ -289,15 +292,21 @@ class String(object):
 
     def assign(self, record, stream, err, warn):
         record[self.name] = self.parse(stream, err, warn)
-        
-class Date(object):
-    zero_pat = re.compile('^0+$')
 
-    def __init__(self, name, length, format='%m/%d/%Y', 
-                 required=False, 
-                 val_format=None,
-                 none_if_invalid=False,
-                 min_year=None):
+
+class Date(object):
+    zero_pat = re.compile("^0+$")
+
+    def __init__(
+        self,
+        name,
+        length,
+        format="%m/%d/%Y",
+        required=False,
+        val_format=None,
+        none_if_invalid=False,
+        min_year=None,
+    ):
         self.name = name
         self.length = length
         self.format = format
@@ -311,7 +320,7 @@ class Date(object):
             return
         value = stream.read(self.length).strip()
         if self.zero_pat.match(value):
-            value = ''
+            value = ""
         if not value:
             if self.required:
                 err("missing required value", value)
@@ -331,36 +340,44 @@ class Date(object):
             try:
                 value = strftime(value, self.val_format)
             except AttributeError:
-                value = ''
+                value = ""
         return value
 
     def assign(self, record, stream, err, warn):
         field = self.name
         record[field] = self.parse(stream, err, warn)
         if record[field] and isinstance(record[field], datetime.date):
-                record["%s_fmt" % field] = strftime(record[field], "%m/%d/%Y")
-                record["%s_iso" % field] = strftime(record[field], "%Y%m%d")
+            record["%s_fmt" % field] = strftime(record[field], "%m/%d/%Y")
+            record["%s_iso" % field] = strftime(record[field], "%Y%m%d")
         else:
             record["%s_fmt" % field] = ""
             record["%s_iso" % field] = ""
 
+
 class Datetime(object):
     formats = {
-        'YYYYMMDD' : (8, '%Y%m%d'),
-        'YYMMDD'   : (6, '%y%m%d'),
-        'MMDDYYYY' : (8, '%m%d%Y'),
-        'YYYYMMDDHHMM' : (12, '%Y%m%d%H%M'),
-        'YYYYMMDDHHMMSS' : (14, '%Y%m%d%H%M%S')
+        "YYYYMMDD": (8, "%Y%m%d"),
+        "YYMMDD": (6, "%y%m%d"),
+        "MMDDYYYY": (8, "%m%d%Y"),
+        "YYYYMMDDHHMM": (12, "%Y%m%d%H%M"),
+        "YYYYMMDDHHMMSS": (14, "%Y%m%d%H%M%S"),
     }
-    def __init__(self, name, format='YYYYMMDDHHMMSS', 
-                 required=False, 
-                 val_format=None,
-                 none_if_invalid=False,
-                 min_year=None):
+
+    def __init__(
+        self,
+        name,
+        format="YYYYMMDDHHMMSS",
+        required=False,
+        val_format=None,
+        none_if_invalid=False,
+        min_year=None,
+    ):
         self.name = name
         if format not in self.formats:
-            raise ValueError("Invalid format %s: Valid formats - %s" %
-                (format, " ".join(self.formats)))
+            raise ValueError(
+                "Invalid format %s: Valid formats - %s"
+                % (format, " ".join(self.formats))
+            )
         self.length, self.format = self.formats[format]
         self.required = required
         self.none_if_invalid = none_if_invalid
@@ -383,8 +400,7 @@ class Datetime(object):
                 value = datetime.datetime(*(value[:6]))
             except ValueError:
                 if not self.none_if_invalid:
-                    err("invalid datetime, expected format %r" % self.format,
-                        value)
+                    err("invalid datetime, expected format %r" % self.format, value)
                 return
         if self.min_year and value.year < self.min_year:
             err("Expected year after %s" % self.min_year, value)
@@ -393,7 +409,7 @@ class Datetime(object):
             try:
                 value = strftime(value, self.val_format)
             except AttributeError:
-                value = ''
+                value = ""
         return value
 
     def assign(self, record, stream, err, warn):
@@ -407,10 +423,8 @@ class Datetime(object):
             record["%s_iso" % field] = ""
 
 
-
 class Currency(object):
-    def __init__(self, name, length, required=False, nonzero=False, 
-                 implicit=None):
+    def __init__(self, name, length, required=False, nonzero=False, implicit=None):
         self.name = name
         self.length = length
         self.required = required
@@ -442,16 +456,19 @@ class Currency(object):
             return
 
         if self.implicit:
-            value = old_div(value, (10 ** self.implicit))
+            value = value / (10**self.implicit)
         return value
 
     def assign(self, record, stream, err, warn):
         record[self.name] = self.parse(stream, err, warn)
 
+
 Numeric = Currency
+
 
 class Integer(object):
     sexp = re.compile("[^\d]")
+
     def __init__(self, name, length, required=False, strip_nonnumeric=True):
         self.name = name
         self.length = length
@@ -473,4 +490,3 @@ class Integer(object):
 
     def assign(self, record, stream, err, warn):
         record[self.name] = self.parse(stream, err, warn)
-
